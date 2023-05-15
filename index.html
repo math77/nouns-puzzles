@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://flbulgarelli.github.io/headbreaker/js/headbreaker.js"></script>
+    <title>Nouns Puzzles</title>
+
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Londrina+Solid&display=swap');
+
+      body {
+        background-color: #ffc110;
+        font-family: 'Londrina Solid', cursive;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #infos {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+
+      button {
+        background-color: #f3322c; 
+        color: #fff;
+        width: 100px;
+        padding: 10px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      #puzzle-overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+        padding: 0;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 1s ease-in-out;
+      }
+
+      #puzzle-overlay.active {
+        opacity: 1;
+        width: 590px;
+        height: 600px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div>
+      <div id="puzzle"></div>
+      <img id="puzzle-overlay" />
+      <div id="infos">
+        <p>
+          Artwork by: 
+          <span>
+            <a></a>
+          </span>
+        </p>
+        <button>
+          Next
+        </button>
+      </div>
+    </div>
+    <div style="margin-left: 10px">
+      <h1>Nouns Puzzles</h1>
+      <h3>
+        If you like this simple and silly project, stop sending money to ben scam and send me a tip so I can buy a new laptop and keep building cool stuff on the internet.
+      </h3>
+      <h4>
+        My Address: 0x235629F5B9daC9e86f35592893dFA4fD2810eF53
+      </h4>
+    </div>
+    <script>
+      const images = [
+        {file: "image1.jpeg", creator: "https://twitter.com/Dixiee_21"},
+        {file: "image2.jpeg", creator: "https://twitter.com/pumey_arts"},
+        {file: "image3.jpeg", creator: "https://twitter.com/GoodBeats"},
+        {file: "image4.jpeg", creator: "https://twitter.com/ale_pjimenez"},
+        {file: "image5.png", creator: "https://twitter.com/8rrx0_"},
+        {file: "image6.jpeg", creator: "https://twitter.com/kimmydeuk"},
+        {file: "image9.jpeg", creator: "https://twitter.com/Summer_Art01"},
+        {file: "image10.png", creator: "https://twitter.com/pumey_arts"},
+        {file: "image11.png", creator: "https://twitter.com/anufo204"},
+        {file: "image12.png", creator: "https://twitter.com/0xDariush"},
+        {file: "image13.png", creator: "https://twitter.com/DwiAnargya"}
+      ];
+
+
+      let currentImageIndex = 0;
+      let imageSrc = images[currentImageIndex].file;
+      let creatorTwitterLink = images[currentImageIndex].creator;
+
+
+      const buttonNext = document.querySelector("button");
+      const artCreatorA = document.querySelector("a");
+
+      loadPuzzle();
+
+      buttonNext.addEventListener("click", (event) => {
+        
+        if(currentImageIndex == 10) {
+          currentImageIndex = 0;
+        } else {
+          currentImageIndex++;
+        }
+
+        imageSrc = images[currentImageIndex].file;
+        creatorTwitterLink = images[currentImageIndex].creator;
+
+        document.getElementById('puzzle-overlay').removeAttribute("class");
+        document.getElementById('puzzle-overlay').removeAttribute("src");
+
+        loadPuzzle();
+
+      });
+
+      function loadPuzzle() {
+
+        artCreatorA.innerText = creatorTwitterLink;
+        artCreatorA.setAttribute("href", creatorTwitterLink);
+        artCreatorA.setAttribute("target", "_blank");
+
+
+        var audio = new Audio('static/connect.wav');
+        let nounsArt = new Image();
+        nounsArt.src = 'static/'+imageSrc;
+        nounsArt.onload = () => {
+          const puzzle = new headbreaker.Canvas('puzzle', {
+            width: 590, height: 600,
+            pieceSize: 100, proximity: 20,
+            borderFill: 10, strokeWidth: 1.5,
+            lineSoftness: 0.18, image: nounsArt,
+            maxPiecesCount: {x: 5, y: 5},
+            strokeColor: 'black',
+            preventOffstageDrag: true,
+            fixed: true
+          });
+
+          puzzle.adjustImagesToPuzzleHeight();
+          puzzle.adjustImagesToPuzzleWidth();
+
+          puzzle.autogenerate();
+
+          puzzle.shuffle(0.7);
+          puzzle.draw();
+
+          puzzle.attachSolvedValidator();
+          puzzle.onValid(() => {
+            document.getElementById('puzzle-overlay').src = "static/"+imageSrc;
+            setTimeout(() => {
+              document.getElementById('puzzle-overlay').setAttribute("class", "active");
+            }, 1500);
+          })
+
+          puzzle.onConnect((_piece, figure, _target, targetFigure) => {
+            // play sound
+            audio.play();
+
+            // paint borders on click
+            // of conecting and conected figures
+            figure.shape.stroke('yellow');
+            targetFigure.shape.stroke('yellow');
+            puzzle.redraw();
+
+            setTimeout(() => {
+              // restore border colors
+              // later
+              figure.shape.stroke('black');
+              targetFigure.shape.stroke('black');
+              puzzle.redraw();
+            }, 200);
+          });
+
+          puzzle.onDisconnect((it) => {
+            audio.play();
+          });
+        }
+      }
+
+      
+    </script>
+  </body>
+</html>
